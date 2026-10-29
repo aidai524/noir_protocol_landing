@@ -8,6 +8,7 @@ import { Build, Resources } from '@/pages/Developers'
 import { Infrastructure, Security, Explorer, Stats } from '@/pages/Infra'
 import { Vision, Adoption, Blog, Contact } from '@/pages/About'
 import Demo from '@/pages/Demo'
+import Gate from '@/pages/Gate'
 import { BRAND, NAV, SOLUTIONS } from '@/content'
 
 const getRoute = () => (location.hash.replace(/^#\/?/, '').split('?')[0] || 'home')
@@ -24,6 +25,14 @@ export default function App() {
   const [route, setRoute] = useState(getRoute)
   const [solid, setSolid] = useState(false)
   const [lang, setLang] = useState<'en' | 'zh'>('en')
+  const [unlocked, setUnlocked] = useState(() => {
+    try { return localStorage.getItem('noir_access') === '1' } catch { return false }
+  })
+
+  const unlock = () => {
+    try { localStorage.setItem('noir_access', '1') } catch { /* ignore */ }
+    setUnlocked(true)
+  }
 
   useEffect(() => {
     const onHash = () => { setRoute(getRoute()); window.scrollTo({ top: 0 }) }
@@ -37,6 +46,8 @@ export default function App() {
   useEffect(() => { document.title = `${BRAND.name} — ${BRAND.tagline}` }, [route])
 
   const seg = segments(route)
+
+  if (!unlocked) return <Gate onUnlock={unlock} />
 
   return (
     <div className="site">
@@ -72,7 +83,7 @@ export default function App() {
       <footer className="site-footer">
         <div className="foot-grid">
           <div className="foot-brand">
-            <a className="site-brand" href="#/home" style={{ fontSize: 16 }}><Mark />NOIR_</a>
+            <a className="site-brand" href="#/home"><Mark />NOIR_</a>
             <p>{BRAND.name} is the privacy-first programmable finance protocol for the Zcash ecosystem.</p>
             <span className="micro">© 2026 NOIR</span>
           </div>
